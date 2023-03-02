@@ -1,6 +1,7 @@
 import React from "react"
 import * as Babylon from "babylonjs"
 import * as Materials from "babylonjs-materials"
+import * as GUI from "babylonjs-gui"
 import SceneComponent from "../Babylon_components/SceneComponent"
 import sol_img from "../recursos/2k_sun.jpg"
 import mercurio_img from "../recursos/2k_mercury.jpg"
@@ -13,7 +14,8 @@ import saturno_anillos_img from "../recursos/2k_saturn2.jpg"
 import saturno_img from "../recursos/2k_saturn.jpg"
 import urano_img from "../recursos/2k_uranus.jpg"
 import neptuno_img from "../recursos/2k_neptune.jpg"
-import via_lactea from "../recursos/via_lactea.jpg"
+
+import guiSistemaSolar from "./guiTextureSistemaSolar.json"
 
 const onSceneReady = (e) => {
 
@@ -236,6 +238,38 @@ const onSceneReady = (e) => {
     var neptunoCirculo = Babylon.MeshBuilder.CreateLines("neptunoCirculo", {points: neptunoOrbita}, scene)
     neptuno.parent = neptunoCirculo
 
+    let advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, scene)
+    advancedTexture.idealWidth = 1920
+    advancedTexture.idealHeight = 1080
+
+    let guiTexture = advancedTexture.parseSerializedObject(guiSistemaSolar)
+
+    let bTierra = advancedTexture.getControlByName("BTierra")
+    let TBTierra = advancedTexture.getControlByName("BTBTierra")
+
+    let siguiendoTierra = false
+
+    bTierra.onPointerClickObservable.add(() => {
+
+        if(!siguiendoTierra) {
+
+            camera.position = new Babylon.Vector3(0, 70, -70)
+            camera.setTarget(tierra.position)
+            siguiendoTierra = true
+            TBTierra.text = "Dejar de seguir tierra"
+
+
+        } else {
+
+            camera.position = new Babylon.Vector3(0, 90, -150)
+            camera.setTarget(new Babylon.Vector3(0, 0, 0))
+            siguiendoTierra = false
+            TBTierra.text = "Seguir tierra"
+
+        }
+
+    })
+
     /**
     * funcion para convertir grados a radianes
     * @param {*} degrees 
@@ -275,6 +309,12 @@ const onSceneReady = (e) => {
 
         tierra.position.x = tierraOrbita[tierraMovimiento].x
         tierra.position.z = tierraOrbita[tierraMovimiento].z
+
+        if(siguiendoTierra) {
+
+            camera.setTarget(tierra.position)
+
+        }
 
         luna.position.x = tierra.absolutePosition.x
         luna.position.z = tierra.absolutePosition.z
